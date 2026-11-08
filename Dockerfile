@@ -24,7 +24,10 @@ RUN apt-get -y --no-install-recommends --allow-unauthenticated install \
    bzip2 \
    libomp-dev \
    gcc \
-   g++
+   g++ \
+   pkg-config \
+   libusb-1.0-0-dev
+
 
 WORKDIR /usr/src/app
 
@@ -39,5 +42,5 @@ CMD echo 'Inside Container:' && \
    ./build-in-docker.sh
 
 
-    
+
 

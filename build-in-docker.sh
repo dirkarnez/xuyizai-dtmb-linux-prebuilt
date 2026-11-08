@@ -12,5 +12,5 @@ gcc --version
 g++ --version
 # g++ (Debian 14.2.0-19) 14.2.0
 
-cd kernel
+cd userspace
 make
