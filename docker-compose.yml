@@ -1,6 +1,9 @@
 services:
-  build:
-    build: .
+  dtmb:
+    build:
+      context: "."
+      platforms:
+        - "linux/arm64"
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     command: sh -c "tail -f /dev/null"
