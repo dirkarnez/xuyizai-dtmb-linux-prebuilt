@@ -28,6 +28,8 @@ jobs:
       
     # continue-on-error: true
       - name: set permission and run
+        env:
+          DOCKER_DEFAULT_PLATFORM: ${{ matrix.platforms }}
         run: |
           sudo chmod -R +x . && \
           mkdir -p dist && \
