@@ -52,7 +52,14 @@ jobs:
       - working-directory: dist
         run: |
           ls -R
-          
+
+      - name: Run find-and-replace to remove refs/heads/
+        uses: mad9000/actions-find-and-replace-string@6
+        id: findandreplace
+        with:
+          source: ${{ matrix.platforms }}
+          find: '/'
+          replace: '-'
       # - uses: fastai/workflows/ssh@master
       #   with:
       #     ssh_key: ${{ secrets.SSH_KEY }}
@@ -66,11 +73,11 @@ jobs:
         with:
           type: 'zip'
           directory: "dist"
-          filename: "xuyizai-dtmb-linux-prebuilt-${{ matrix.platforms }}-${{ github.ref_name }}.zip"
+          filename: "xuyizai-dtmb-linux-prebuilt-${{ steps.findandreplace.outputs.value }}-${{ github.ref_name }}.zip"
           
       - name: Release prebuilt
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "dist/xuyizai-dtmb-linux-prebuilt-${{ matrix.platforms }}-${{ github.ref_name }}.zip"
+          artifacts: "dist/xuyizai-dtmb-linux-prebuilt-${{ steps.findandreplace.outputs.value }}-${{ github.ref_name }}.zip"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
