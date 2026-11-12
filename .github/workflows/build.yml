@@ -10,25 +10,46 @@ permissions:
     contents: write
     
 jobs:
-  test:
+  build:
+    strategy:
+      matrix:
+        platforms: [ "linux/amd64", "linux/arm64" ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
       - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4.4.0
         with:
-          platforms: linux/amd64,linux/arm64
-      
+          platforms: ${{ matrix.platforms }}
+          
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4.4.1
       
     # continue-on-error: true
       - name: set permission and run
         run: |
           sudo chmod -R +x . && \
+          mkdir -p dist && \
           ls && \
           docker compose up --build && docker compose down
+
+      - working-directory: dist
+        run: |
+          mkdir -p kernel
+          
+      - working-directory: dist
+        run: |
+          mkdir -p userspace/firmware
+          
+      - run: |
+          cp ./userspace/firmware/dvb-usb-lme2510c-dtmb-5300.fw ./dist/userspace/firmware/ && \
+          cp ./userspace/run_lme2510_libusb.sh ./dist/userspace/ && \
+          cp ./userspace/lme2510_dtmb_libusb ./dist/userspace/
+          
+      - working-directory: dist
+        run: |
+          ls -R
           
       # - uses: fastai/workflows/ssh@master
       #   with:
@@ -42,12 +63,12 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          directory: "userspace"
-          filename: "xuyizai-dtmb-linux-prebuilt-${{ github.ref_name }}.zip"
+          directory: "dist"
+          filename: "xuyizai-dtmb-linux-prebuilt-${{ matrix.platforms }}-${{ github.ref_name }}.zip"
           
       - name: Release prebuilt
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "userspace/xuyizai-dtmb-linux-prebuilt-${{ github.ref_name }}.zip"
+          artifacts: "dist/xuyizai-dtmb-linux-prebuilt-${{ matrix.platforms }}-${{ github.ref_name }}.zip"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
